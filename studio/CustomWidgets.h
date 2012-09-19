@@ -1,6 +1,6 @@
 /*
 	Aseba - an event-based framework for distributed robot control
-	Copyright (C) 2007--2011:
+	Copyright (C) 2007--2012:
 		Stephane Magnenat <stephane at magnenat dot net>
 		(http://stephane.magnenat.net)
 		and other contributors, see authors.txt for details
@@ -47,6 +47,14 @@ namespace Aseba
 	
 	protected:
 		virtual void resizeEvent ( QResizeEvent * event );
+
+		void startDrag(Qt::DropActions supportedActions);
+		void dragEnterEvent(QDragEnterEvent *event);
+		void dragMoveEvent(QDragMoveEvent *event);
+		void dropEvent(QDropEvent *event);
+
+		QPixmap getDragPixmap(QString text);
+		bool modelMatchMimeFormat(QStringList candidates);
 	};
 	
 	/*@}*/

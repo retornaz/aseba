@@ -2,6 +2,10 @@
 <qresource>
 	<file>asebastudio_fr.qm</file>
 	<file>asebastudio_de.qm</file>
+	<file>asebastudio_es.qm</file>
+	<file>compiler_fr.qm</file>
+	<file>compiler_de.qm</file>
+	<file>compiler_es.qm</file>
 	<file>images/ok.png</file>
 	<file>images/no.png</file>
 	<file>images/filenew.png</file>
@@ -40,5 +44,17 @@
 	<file>images/busy.png</file>
 	<file>images/eye.png</file>
 	<file>images/eyeclose.png</file>
+	<file>images/kedit.png</file>
+	<file>images/exec.png</file>
+	<file>images/thymioclap.svg</file>
+	<file>images/thymiotap.svg</file>
+	<file>images/play.svgz</file>
+	<file>images/save.svgz</file>
+	<file>images/saveas.svgz</file>
+	<file>images/filenew.svgz</file>
+	<file>images/fileopen.svgz</file>
+	<file>images/exit.svgz</file>
+	<file>images/stop1.png</file>
+	<file>images/run.png</file>
 </qresource>
 </RCC>

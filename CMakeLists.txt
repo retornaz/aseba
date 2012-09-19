@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 2.6)
 project(aseba)
 include(ParseVersion.cmake)
 
+add_definitions(-Wall)
+
 # Dashel
 # TODO: make Dashel.cmake to perform this
 
@@ -95,6 +97,7 @@ set (ASEBACOMPILER_SRC
 	compiler/parser.cpp
 	compiler/analysis.cpp
 	compiler/tree-build.cpp
+	compiler/tree-expand.cpp
 	compiler/tree-dump.cpp
 	compiler/tree-typecheck.cpp
 	compiler/tree-optimize.cpp
@@ -170,6 +173,8 @@ add_subdirectory(cmd)
 add_subdirectory(dump)
 
 add_subdirectory(replay)
+
+add_subdirectory(exec)
 
 add_subdirectory(targets/dummy)
 

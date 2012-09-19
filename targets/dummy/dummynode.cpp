@@ -61,7 +61,7 @@ public:
 	AsebaNode()
 	{
 		// setup variables
-		vm.nodeId = ASEBA_PID_UNDEFINED;
+		vm.nodeId = 1;
 		
 		bytecode.resize(512);
 		vm.bytecode = &bytecode[0];
@@ -157,13 +157,20 @@ extern "C" void AsebaSendBuffer(AsebaVMState *vm, const uint8* data, uint16 leng
 	Dashel::Stream* stream = node.stream;
 	if (stream)
 	{
-		uint16 temp;
-		temp = bswap16(length - 2);
-		stream->write(&temp, 2);
-		temp = bswap16(vm->nodeId);
-		stream->write(&temp, 2);
-		stream->write(data, length);
-		stream->flush();
+		try
+		{
+			uint16 temp;
+			temp = bswap16(length - 2);
+			stream->write(&temp, 2);
+			temp = bswap16(vm->nodeId);
+			stream->write(&temp, 2);
+			stream->write(data, length);
+			stream->flush();
+		}
+		catch (Dashel::DashelException e)
+		{
+			std::cerr << "Cannot write to socket: " << stream->getFailReason() << std::endl;
+		}
 	}
 }
 

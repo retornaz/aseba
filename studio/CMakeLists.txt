@@ -20,6 +20,7 @@ if (QT4_FOUND)
 	set(QT_USE_QTMAIN ON)
 	set(QT_USE_QTHELP ON)
 	set(QT_USE_QTCONCURRENT ON)
+	set(QT_USE_QTSVG ON)
 	include(${QT_USE_FILE})
 
 	# add a console for debug messages under Windows
@@ -66,6 +67,8 @@ if (QT4_FOUND)
 				MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/${DOC_NAME}.qhcp ${CMAKE_CURRENT_SOURCE_DIR}/${DOC_NAME}.qhp)
 			add_custom_target(documentation DEPENDS ${DOC_NAME}.qhc ${DOC_NAME}.qch)
 		endif (WIN32)
+	else (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
+		message(FATAL_ERROR "-- qcollectiongenerator executable not found (hint: on Ubuntu, install package qt4-dev-tools)")
 	endif (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
 	
 	set(studio_SRCS
@@ -83,8 +86,19 @@ if (QT4_FOUND)
 		EventViewer.cpp
 		Plugin.cpp
 		HelpViewer.cpp
+		ConfigDialog.cpp
+		ModelAggregator.cpp
+		translations/CompilerTranslator.cpp
 		plugins/VariablesViewPlugin.cpp
 		plugins/ThymioBootloader.cpp
+		plugins/ThymioVPL/ThymioVisualProgramming.cpp
+		plugins/ThymioVPL/ThymioScene.cpp
+		plugins/ThymioVPL/ThymioButtons.cpp
+		plugins/ThymioVPL/ThymioEventButtons.cpp
+		plugins/ThymioVPL/ThymioActionButtons.cpp
+		plugins/ThymioVPL/ThymioIRButtons.cpp
+		plugins/ThymioVPL/ThymioIRVisitors.cpp
+		plugins/ThymioVPL/ThymioCompiler.cpp
 		../${TRANSPORT_PLUGIN})
 	
 	qt4_automoc(${studio_SRCS})

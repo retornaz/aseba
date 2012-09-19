@@ -1,6 +1,6 @@
 /*
 	Aseba - an event-based framework for distributed robot control
-	Copyright (C) 2007--2011:
+	Copyright (C) 2007--2012:
 		Stephane Magnenat <stephane at magnenat dot net>
 		(http://stephane.magnenat.net)
 		and other contributors, see authors.txt for details
@@ -339,7 +339,7 @@ namespace Aseba
 		for(PageMap::iterator it = pageMap.begin(); it != pageMap.end(); it++)
 		{
 			int isempty = 1;
-			int i;
+			unsigned int i;
 			for(i = 0; i < pageSize; i+=4)
 				if(it->second[i] != 0xff || it->second[i+1] != 0xff || it->second[i+2] != 0xff) {
 					isempty = 0;

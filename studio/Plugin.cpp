@@ -1,6 +1,6 @@
 /*
 	Aseba - an event-based framework for distributed robot control
-	Copyright (C) 2007--2011:
+	Copyright (C) 2007--2012:
 		Stephane Magnenat <stephane at magnenat dot net>
 		(http://stephane.magnenat.net)
 		and other contributors, see authors.txt for details
@@ -26,18 +26,20 @@
 #include "MainWindow.h"
 #include "../utils/utils.h"
 #include "../common/productids.h"
+#include "NamedValuesVectorModel.h"
 
 // plugins
 
 #include "plugins/VariablesViewPlugin.h"
 #include "plugins/ThymioBootloader.h"
+#include "plugins/ThymioVPL/ThymioVisualProgramming.h"
 
 namespace Aseba
 {	
 	/** \addtogroup studio */
 	/*@{*/
 
-	InvasivePlugin::InvasivePlugin(NodeTab* nodeTab) : nodeTab(nodeTab) {};
+	InvasivePlugin::InvasivePlugin(NodeTab* nodeTab) : nodeTab(nodeTab) { mainWindow = nodeTab->mainWindow; };
 
 	Dashel::Stream* InvasivePlugin::getDashelStream()
 	{
@@ -56,9 +58,48 @@ namespace Aseba
 		return nodeTab->id;
 	}
 	
+	void InvasivePlugin::displayCode(QList<QString> code)
+	{
+		nodeTab->displayCode(code);
+	}
+	
+	void InvasivePlugin::loadNrun()
+	{
+		nodeTab->loadClicked();
+		nodeTab->target->run(nodeTab->id);
+	}
+
+	void InvasivePlugin::stop()
+	{
+		nodeTab->target->stop(nodeTab->id);
+	}
+	
+	QString InvasivePlugin::saveFile(bool as)
+	{
+		if( as )
+			mainWindow->saveFile();
+		else
+			mainWindow->save();
+	
+		return mainWindow->actualFileName;
+	}
+	
+	void InvasivePlugin::openFile(QString name)
+	{ 
+		mainWindow->sourceModified = false;
+		mainWindow->constantsDefinitionsModel->clearWasModified();
+		mainWindow->eventsDescriptionsModel->clearWasModified();
+		mainWindow->openFile(name);
+	}
+	
 	TargetVariablesModel * InvasivePlugin::getVariablesModel()
 	{
 		return nodeTab->vmMemoryModel;
+	}
+	
+	void InvasivePlugin::setVariableValues(unsigned addr, const VariablesDataVector &data)
+	{
+		nodeTab->setVariableValues(addr, data);
 	}
 	
 	//! Create an instance of C, passing node to its constructor
@@ -107,6 +148,7 @@ namespace Aseba
 		reg(ASEBA_PID_SMARTROB, &createInstance<LinearCameraViewPlugin>);
 		
 		reg(ASEBA_PID_THYMIO2, &createInstance<ThymioBootloaderDialog>);
+		reg(ASEBA_PID_THYMIO2, &createInstance<ThymioVisualProgramming>);
 	}
 	
 	/*@}*/

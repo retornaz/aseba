@@ -1,6 +1,6 @@
 /*
 	Aseba - an event-based framework for distributed robot control
-	Copyright (C) 2007--2011:
+	Copyright (C) 2007--2012:
 		Stephane Magnenat <stephane at magnenat dot net>
 		(http://stephane.magnenat.net)
 		and other contributors, see authors.txt for details
@@ -39,7 +39,7 @@ namespace Aseba
 	void dumpCommandList(ostream &stream)
 	{
 		stream << "* presence : broadcast presence message\n";
-		stream << "* usermsg: user message [type] [length in 16 bit words]\n";
+		stream << "* usermsg: user message [type] [word0] ... [wordN]\n";
 		stream << "* rdpage : bootloader read page [dest] [page number]\n";
 		stream << "* rdpageusb : bootloader read page usb [dest] [page number]\n";
 		stream << "* whex : write hex file [dest] [file name] [reset]\n";
@@ -158,14 +158,17 @@ namespace Aseba
 		//! Create an interface to bootloader with id dest using a socket
 		BootloaderInterface(Stream* stream, int dest) :
 			stream(stream),
-			dest(dest)
+			dest(dest),
+			pageSize(0),
+			pagesStart(0),
+			pagesCount(0)
 		{
 			// Wait until the bootloader answers
 
 		}
 		
 		//! Return the size of a page
-		int getPageSize() { return pageSize; }
+		int getPageSize() const { return pageSize; }
 		
 		//! Read a page
 		bool readPage(unsigned pageNumber, uint8* data)
@@ -581,15 +584,15 @@ namespace Aseba
 		else if (strcmp(cmd, "usermsg") == 0)
 		{
 			// first arg is type, second is length
-			if (argc < 3)
+			if (argc < 2)
 				errorMissingArgument(argv[0]);
-			argEaten = 2;
+			argEaten = argc;
 			uint16 type = atoi(argv[1]);
-			uint16 length = atoi(argv[2]);
+			uint16 length = argc-2;
 			
 			UserMessage::DataVector data(length);
 			for (size_t i = 0; i < length; i++)
-				data[i] = i;
+				data[i] = atoi(argv[i+2]);
 			
 			UserMessage message(type, data);
 			message.serialize(stream);

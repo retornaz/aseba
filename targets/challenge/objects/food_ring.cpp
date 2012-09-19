@@ -7,7 +7,7 @@
 	Copyright (C) 2008:
 		Basilio Noris
 	Aseba - an event-based framework for distributed robot control
-	Copyright (C) 2007--2011:
+	Copyright (C) 2007--2012:
 		Stephane Magnenat <stephane at magnenat dot net>
 		(http://stephane.magnenat.net)
 		and other contributors, see authors.txt for details
@@ -119,16 +119,13 @@ namespace Enki
 
 	GLint GenFeederRing()
 	{
-		int i;
-		int j;
-		
 		GLint lid=glGenLists(1);
 		glNewList(lid, GL_COMPILE);
 		
 		glBegin (GL_TRIANGLES);
-		for(i=0;i<sizeof(face_indicies)/sizeof(face_indicies[0]);i++)
+		for(size_t i=0;i<sizeof(face_indicies)/sizeof(face_indicies[0]);i++)
 		{
-			for(j=0;j<3;j++)
+			for(size_t j=0;j<3;j++)
 			{
 				int vi=face_indicies[i][j];
 				int ni=face_indicies[i][j+3];//Normal index

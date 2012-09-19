@@ -1,6 +1,6 @@
 /*
 	Aseba - an event-based framework for distributed robot control
-	Copyright (C) 2007--2011:
+	Copyright (C) 2007--2012:
 		Stephane Magnenat <stephane at magnenat dot net>
 		(http://stephane.magnenat.net)
 		and other contributors, see authors.txt for details
@@ -56,72 +56,72 @@ namespace Aseba
 	}
 	
 	//! Return the name of the type of this token
-	const wchar_t* Compiler::Token::typeName() const
+	const std::wstring Compiler::Token::typeName() const
 	{
 		switch (type)
 		{
-			case TOKEN_END_OF_STREAM: return L"end of stream";
-			case TOKEN_STR_when: return L"when keyword";
-			case TOKEN_STR_emit: return L"emit keyword";
-			case TOKEN_STR_for: return L"for keyword";
-			case TOKEN_STR_in: return L"in keyword";
-			case TOKEN_STR_step: return L"step keyword";
-			case TOKEN_STR_while: return L"while keyword";
-			case TOKEN_STR_do: return L"do keyword";
-			case TOKEN_STR_if: return L"if keyword";
-			case TOKEN_STR_then: return L"then keyword";
-			case TOKEN_STR_else: return L"else keyword";
-			case TOKEN_STR_elseif: return L"elseif keyword";
-			case TOKEN_STR_end: return L"end keyword";
-			case TOKEN_STR_var: return L"var keyword";
-			case TOKEN_STR_call: return L"call keyword";
-			case TOKEN_STR_sub: return L"sub keyword";
-			case TOKEN_STR_callsub: return L"callsub keyword";
-			case TOKEN_STR_onevent: return L"onevent keyword";
-			case TOKEN_STR_abs: return L"abs keyword";
-			case TOKEN_STRING_LITERAL: return L"string";
-			case TOKEN_INT_LITERAL: return L"integer";
-			case TOKEN_PAR_OPEN: return L"( (open parenthesis)";
-			case TOKEN_PAR_CLOSE: return L") (close parenthesis)";
-			case TOKEN_BRACKET_OPEN: return L"[ (open bracket)";
-			case TOKEN_BRACKET_CLOSE: return L"] (close bracket)";
-			case TOKEN_COLON: return L": (colon)";
-			case TOKEN_COMMA: return L", (comma)";
-			case TOKEN_ASSIGN: return L"= (assignation)";
-			case TOKEN_OP_OR: return L"or";
-			case TOKEN_OP_AND: return L"and";
-			case TOKEN_OP_NOT: return L"not";
-			case TOKEN_OP_BIT_OR: return L"binary or";
-			case TOKEN_OP_BIT_XOR: return L"binary xor";
-			case TOKEN_OP_BIT_AND: return L"binary and";
-			case TOKEN_OP_BIT_NOT: return L"binary not";
-			case TOKEN_OP_BIT_OR_EQUAL: return L"binary or equal";
-			case TOKEN_OP_BIT_XOR_EQUAL: return L"binary xor equal";
-			case TOKEN_OP_BIT_AND_EQUAL: return L"binary and equal";
-			case TOKEN_OP_BIT_NOT_EQUAL: return L"binary not equal";
-			case TOKEN_OP_EQUAL: return L"== (equal to)";
-			case TOKEN_OP_NOT_EQUAL: return L"!= (not equal to)";
-			case TOKEN_OP_BIGGER: return L"> (bigger than)";
-			case TOKEN_OP_BIGGER_EQUAL: return L">= (bigger or equal than)";
-			case TOKEN_OP_SMALLER: return L"< (smaller than)";
-			case TOKEN_OP_SMALLER_EQUAL: return L"<= (smaller or equal than)";
-			case TOKEN_OP_SHIFT_LEFT: return L"<< (shift left)";
-			case TOKEN_OP_SHIFT_RIGHT: return L">> (shift right)";
-			case TOKEN_OP_SHIFT_LEFT_EQUAL: return L"<<= (shift left equal)";
-			case TOKEN_OP_SHIFT_RIGHT_EQUAL: return L">>= (shift right equal)";
-			case TOKEN_OP_ADD: return L"+ (plus)";
-			case TOKEN_OP_NEG: return L"- (minus)";
-			case TOKEN_OP_ADD_EQUAL: return L"+= (plus equal)";
-			case TOKEN_OP_NEG_EQUAL: return L"-= (minus equal)";
-			case TOKEN_OP_PLUS_PLUS: return L"++ (plus) plus";
-			case TOKEN_OP_MINUS_MINUS: return L"-- (minus minus)";
-			case TOKEN_OP_MULT: return L"* (time)";
-			case TOKEN_OP_DIV: return L"/ (divide)";
-			case TOKEN_OP_MOD: return L"modulo";
-			case TOKEN_OP_MULT_EQUAL: return L"*= (time equal)";
-			case TOKEN_OP_DIV_EQUAL: return L"/= (divide equal)";
-			case TOKEN_OP_MOD_EQUAL: return L"modulo equal";
-			default: return L"unknown";
+			case TOKEN_END_OF_STREAM: return translate(ERROR_TOKEN_END_OF_STREAM);
+			case TOKEN_STR_when: return translate(ERROR_TOKEN_STR_when);
+			case TOKEN_STR_emit: return translate(ERROR_TOKEN_STR_emit);
+			case TOKEN_STR_for: return translate(ERROR_TOKEN_STR_for);
+			case TOKEN_STR_in: return translate(ERROR_TOKEN_STR_in);
+			case TOKEN_STR_step: return translate(ERROR_TOKEN_STR_step);
+			case TOKEN_STR_while: return translate(ERROR_TOKEN_STR_while);
+			case TOKEN_STR_do: return translate(ERROR_TOKEN_STR_do);
+			case TOKEN_STR_if: return translate(ERROR_TOKEN_STR_if);
+			case TOKEN_STR_then: return translate(ERROR_TOKEN_STR_then);
+			case TOKEN_STR_else: return translate(ERROR_TOKEN_STR_else);
+			case TOKEN_STR_elseif: return translate(ERROR_TOKEN_STR_elseif);
+			case TOKEN_STR_end: return translate(ERROR_TOKEN_STR_end);
+			case TOKEN_STR_var: return translate(ERROR_TOKEN_STR_var);
+			case TOKEN_STR_call: return translate(ERROR_TOKEN_STR_call);
+			case TOKEN_STR_sub: return translate(ERROR_TOKEN_STR_sub);
+			case TOKEN_STR_callsub: return translate(ERROR_TOKEN_STR_callsub);
+			case TOKEN_STR_onevent: return translate(ERROR_TOKEN_STR_onevent);
+			case TOKEN_STR_abs: return translate(ERROR_TOKEN_STR_abs);
+			case TOKEN_STR_return: return translate(ERROR_TOKEN_STR_return);
+			case TOKEN_STRING_LITERAL: return translate(ERROR_TOKEN_STRING_LITERAL);
+			case TOKEN_INT_LITERAL: return translate(ERROR_TOKEN_INT_LITERAL);
+			case TOKEN_PAR_OPEN: return translate(ERROR_TOKEN_PAR_OPEN);
+			case TOKEN_PAR_CLOSE: return translate(ERROR_TOKEN_PAR_CLOSE);
+			case TOKEN_BRACKET_OPEN: return translate(ERROR_TOKEN_BRACKET_OPEN);
+			case TOKEN_BRACKET_CLOSE: return translate(ERROR_TOKEN_BRACKET_CLOSE);
+			case TOKEN_COLON: return translate(ERROR_TOKEN_COLON);
+			case TOKEN_COMMA: return translate(ERROR_TOKEN_COMMA);
+			case TOKEN_ASSIGN: return translate(ERROR_TOKEN_ASSIGN);
+			case TOKEN_OP_OR: return translate(ERROR_TOKEN_OP_OR);
+			case TOKEN_OP_AND: return translate(ERROR_TOKEN_OP_AND);
+			case TOKEN_OP_NOT: return translate(ERROR_TOKEN_OP_NOT);
+			case TOKEN_OP_BIT_OR: return translate(ERROR_TOKEN_OP_BIT_OR);
+			case TOKEN_OP_BIT_XOR: return translate(ERROR_TOKEN_OP_BIT_XOR);
+			case TOKEN_OP_BIT_AND: return translate(ERROR_TOKEN_OP_BIT_AND);
+			case TOKEN_OP_BIT_NOT: return translate(ERROR_TOKEN_OP_BIT_NOT);
+			case TOKEN_OP_BIT_OR_EQUAL: return translate(ERROR_TOKEN_OP_BIT_OR_EQUAL);
+			case TOKEN_OP_BIT_XOR_EQUAL: return translate(ERROR_TOKEN_OP_BIT_XOR_EQUAL);
+			case TOKEN_OP_BIT_AND_EQUAL: return translate(ERROR_TOKEN_OP_BIT_AND_EQUAL);
+			case TOKEN_OP_EQUAL: return translate(ERROR_TOKEN_OP_EQUAL);
+			case TOKEN_OP_NOT_EQUAL: return translate(ERROR_TOKEN_OP_NOT_EQUAL);
+			case TOKEN_OP_BIGGER: return translate(ERROR_TOKEN_OP_BIGGER);
+			case TOKEN_OP_BIGGER_EQUAL: return translate(ERROR_TOKEN_OP_BIGGER_EQUAL);
+			case TOKEN_OP_SMALLER: return translate(ERROR_TOKEN_OP_SMALLER);
+			case TOKEN_OP_SMALLER_EQUAL: return translate(ERROR_TOKEN_OP_SMALLER_EQUAL);
+			case TOKEN_OP_SHIFT_LEFT: return translate(ERROR_TOKEN_OP_SHIFT_LEFT);
+			case TOKEN_OP_SHIFT_RIGHT: return translate(ERROR_TOKEN_OP_SHIFT_RIGHT);
+			case TOKEN_OP_SHIFT_LEFT_EQUAL: return translate(ERROR_TOKEN_OP_SHIFT_LEFT_EQUAL);
+			case TOKEN_OP_SHIFT_RIGHT_EQUAL: return translate(ERROR_TOKEN_OP_SHIFT_RIGHT_EQUAL);
+			case TOKEN_OP_ADD: return translate(ERROR_TOKEN_OP_ADD);
+			case TOKEN_OP_NEG: return translate(ERROR_TOKEN_OP_NEG);
+			case TOKEN_OP_ADD_EQUAL: return translate(ERROR_TOKEN_OP_ADD_EQUAL);
+			case TOKEN_OP_NEG_EQUAL: return translate(ERROR_TOKEN_OP_NEG_EQUAL);
+			case TOKEN_OP_PLUS_PLUS: return translate(ERROR_TOKEN_OP_PLUS_PLUS);
+			case TOKEN_OP_MINUS_MINUS: return translate(ERROR_TOKEN_OP_MINUS_MINUS);
+			case TOKEN_OP_MULT: return translate(ERROR_TOKEN_OP_MULT);
+			case TOKEN_OP_DIV: return translate(ERROR_TOKEN_OP_DIV);
+			case TOKEN_OP_MOD: return translate(ERROR_TOKEN_OP_MOD);
+			case TOKEN_OP_MULT_EQUAL: return translate(ERROR_TOKEN_OP_MULT_EQUAL);
+			case TOKEN_OP_DIV_EQUAL: return translate(ERROR_TOKEN_OP_DIV_EQUAL);
+			case TOKEN_OP_MOD_EQUAL: return translate(ERROR_TOKEN_OP_MOD_EQUAL);
+			default: return translate(ERROR_TOKEN_UNKNOWN);
 		}
 	}
 	
@@ -129,7 +129,7 @@ namespace Aseba
 	std::wstring Compiler::Token::toWString() const
 	{
 		std::wostringstream oss;
-		oss << L"Line: " << pos.row + 1 << L" Col: " << pos.column + 1 << L" : ";
+		oss << translate(ERROR_LINE) << pos.row + 1 << translate(ERROR_COL) << pos.column + 1 << L" : ";
 		oss << typeName();
 		if (type == TOKEN_INT_LITERAL)
 			oss << L" : " << iValue;
@@ -203,7 +203,7 @@ namespace Aseba
 							if (source.eof())
 							{
 								// EOF -> unbalanced block
-								throw Error(begin, L"Unbalanced comment block.");
+								throw TranslatableError(begin, ERROR_UNBALANCED_COMMENT_BLOCK);
 							}
 						}
 						// fetch the #
@@ -286,15 +286,13 @@ namespace Aseba
 					break;
 
 				case '~':
-					if (testNextCharacter(source, pos, '=', Token::TOKEN_OP_BIT_NOT_EQUAL))
-						break;
 					tokens.push_back(Token(Token::TOKEN_OP_BIT_NOT, pos));
 					break;
 
 				case '!':
 					if (testNextCharacter(source, pos, '=', Token::TOKEN_OP_NOT_EQUAL))
 						break;
-					throw Error(pos, L"syntax error");
+					throw TranslatableError(pos, ERROR_SYNTAX);
 					break;
 				
 				case '=':
@@ -341,7 +339,7 @@ namespace Aseba
 				{
 					// check first character
 					if (!iswalnum(c) && (c != '_'))
-						throw Error(pos, WFormatableString(L"identifiers must begin with _ and an alphanumeric character, found unicode character 0x%0 instead").arg((unsigned)c, 0, 16));
+						throw TranslatableError(pos, ERROR_INVALID_IDENTIFIER).arg((unsigned)c, 0, 16);
 					
 					// get a string
 					std::wstring s;
@@ -367,16 +365,16 @@ namespace Aseba
 							{
 								for (unsigned i = 2; i < s.size(); i++)
 									if (!std::isxdigit(s[i]))
-										throw Error(pos, L"error in hexadecimal number");
+										throw TranslatableError(pos, ERROR_INVALID_HEXA_NUMBER);
 							}
 							else if (s[1] == 'b')
 							{
 								for (unsigned i = 2; i < s.size(); i++)
 									if ((s[i] != '0') && (s[i] != '1'))
-										throw Error(pos, L"error in binary number");
+										throw TranslatableError(pos, ERROR_INVALID_BINARY_NUMBER);
 							}
 							else
-								throw Error(pos, L"error in number, invalid base");
+								throw TranslatableError(pos, ERROR_NUMBER_INVALID_BASE);
 							
 						}
 						else
@@ -384,7 +382,7 @@ namespace Aseba
 							// check if we have a valid number
 							for (unsigned i = 1; i < s.size(); i++)
 								if (!std::isdigit(s[i]))
-									throw Error(pos, L"error in number");
+									throw TranslatableError(pos, ERROR_IN_NUMBER);
 						}
 						tokens.push_back(Token(Token::TOKEN_INT_LITERAL, pos, s));
 					}
@@ -427,6 +425,8 @@ namespace Aseba
 							tokens.push_back(Token(Token::TOKEN_STR_onevent, pos));
 						else if (s == L"abs")
 							tokens.push_back(Token(Token::TOKEN_STR_abs, pos));
+						else if (s == L"return")
+							tokens.push_back(Token(Token::TOKEN_STR_return, pos));
 						else if (s == L"or")
 							tokens.push_back(Token(Token::TOKEN_OP_OR, pos));
 						else if (s == L"and")
@@ -456,7 +456,7 @@ namespace Aseba
 
 	bool Compiler::testNextCharacter(std::wistream &source, SourcePos &pos, wchar_t test, Token::Type tokenIfTrue)
 	{
-		if (source.peek() == test)
+		if (source.peek() == int(test))
 		{
 			tokens.push_back(Token(tokenIfTrue, pos));
 			getNextCharacter(source, pos);

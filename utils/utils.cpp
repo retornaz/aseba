@@ -1,6 +1,6 @@
 /*
 	Aseba - an event-based framework for distributed robot control
-	Copyright (C) 2007--2011:
+	Copyright (C) 2007--2012:
 		Stephane Magnenat <stephane at magnenat dot net>
 		(http://stephane.magnenat.net)
 		and other contributors, see authors.txt for details
@@ -202,13 +202,13 @@ namespace Aseba
 			{
 				//Byte represents the start of an encoded character in the range
 				//U+0080 to U+07FF
-				res += ((*a&31)<<6)|a[1]&63;
+				res += ((*a&31)<<6)|(a[1]&63);
 			}
 			else if ((*a&240)==224)
 			{
 				//Byte represents the start of an encoded character in the range
 				//U+07FF to U+FFFF
-				res += ((*a&15)<<12)|((a[1]&63)<<6)|a[2]&63;
+				res += ((*a&15)<<12)|((a[1]&63)<<6)|(a[2]&63);
 			}
 			else if ((*a&248)==240)
 			{

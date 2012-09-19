@@ -1,6 +1,6 @@
 /*
 	Aseba - an event-based framework for distributed robot control
-	Copyright (C) 2007--2011:
+	Copyright (C) 2007--2012:
 		Stephane Magnenat <stephane at magnenat dot net>
 		(http://stephane.magnenat.net)
 		and other contributors, see authors.txt for details
@@ -107,6 +107,9 @@ namespace Aseba
 		//! Return a constant description of a node. Returned value is always valid if node exists
 		virtual const TargetDescription * const getDescription(unsigned node) const = 0;
 		
+		//! Request descriptions from the aseba network
+		virtual void broadcastGetDescription() = 0;
+		
 		//! Upload bytecode to target.
 		virtual void uploadBytecode(unsigned node, const BytecodeVector &bytecode) = 0;
 		
@@ -157,7 +160,8 @@ namespace Aseba
 	
 	protected:
 		friend class ThymioBootloaderDialog;
-		
+		friend class ThymioVisualProgramming;
+				
 		//! Block all write operations, used by invasive plugins when they do something hacky with the underlying data stream
 		virtual void blockWrite() = 0;
 		

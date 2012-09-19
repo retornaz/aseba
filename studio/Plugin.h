@@ -1,6 +1,6 @@
 /*
 	Aseba - an event-based framework for distributed robot control
-	Copyright (C) 2007--2011:
+	Copyright (C) 2007--2012:
 		Stephane Magnenat <stephane at magnenat dot net>
 		(http://stephane.magnenat.net)
 		and other contributors, see authors.txt for details
@@ -26,6 +26,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <set>
+#include "../compiler/compiler.h"
 
 class QMenu;
 
@@ -42,11 +43,13 @@ namespace Aseba
 	class NodeTab;
 	class Target;
 	class TargetVariablesModel;
+	class MainWindow;
 	
 	//! To access private members of MainWindow and its children, a plugin must inherit from this class
 	struct InvasivePlugin
 	{
 		NodeTab* nodeTab;
+		MainWindow *mainWindow;
 		
 		InvasivePlugin(NodeTab* nodeTab);
 		virtual ~InvasivePlugin() {}
@@ -54,7 +57,13 @@ namespace Aseba
 		Dashel::Stream* getDashelStream();
 		Target * getTarget();
 		unsigned getNodeId();
+		void displayCode(QList<QString> code);
+		void loadNrun();
+		void stop();
 		TargetVariablesModel * getVariablesModel();
+		void setVariableValues(unsigned, const VariablesDataVector &);
+		QString saveFile(bool as=false);
+		void openFile(QString name);
 	};
 	
 	//! A tool that is specific to a node

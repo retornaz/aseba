@@ -1,6 +1,6 @@
 /*
 	Aseba - an event-based framework for distributed robot control
-	Copyright (C) 2007--2011:
+	Copyright (C) 2007--2012:
 		Stephane Magnenat <stephane at magnenat dot net>
 		(http://stephane.magnenat.net)
 		and other contributors, see authors.txt for details
@@ -86,11 +86,17 @@ namespace Aseba
 		Q_OBJECT
 		
 	public:
+		bool isRunning;
 		Dashel::Stream* stream;
+		std::string lastConnectedTarget;
 		QString language;
 		
 	public:
 		DashelInterface(QVector<QTranslator*> translators, const QString& commandLineTarget);
+		bool attemptToReconnect();
+		
+		// from Dashel::Hub
+		virtual void stop();
 		
 	signals:
 		void messageAvailable(Message *message);
@@ -159,6 +165,8 @@ namespace Aseba
 		
 		virtual const TargetDescription * const getDescription(unsigned node) const;
 		
+		virtual void broadcastGetDescription();
+		
 		virtual void uploadBytecode(unsigned node, const BytecodeVector &bytecode);
 		virtual void writeBytecode(unsigned node);
 		virtual void reboot(unsigned node);
@@ -206,6 +214,9 @@ namespace Aseba
 		bool emitNodeConnectedIfDescriptionComplete(unsigned id, const Node& node);
 		int getPCFromLine(unsigned node, unsigned line);
 		int getLineFromPC(unsigned node, unsigned pc);
+
+	protected:
+		void handleDashelException(Dashel::DashelException e);
 	};
 	
 	/*@}*/

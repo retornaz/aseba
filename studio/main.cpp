@@ -1,6 +1,6 @@
 /*
 	Aseba - an event-based framework for distributed robot control
-	Copyright (C) 2007--2011:
+	Copyright (C) 2007--2012:
 		Stephane Magnenat <stephane at magnenat dot net>
 		(http://stephane.magnenat.net)
 		and other contributors, see authors.txt for details
@@ -93,15 +93,17 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
-	
+
+	// translation files are loaded in DashelTarget.cpp
 	QTranslator qtTranslator;
-	qtTranslator.load("qt_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
 	app.installTranslator(&qtTranslator);
-	
+
 	QTranslator translator;
-	translator.load(QString(":/asebastudio_") + QLocale::system().name());
 	app.installTranslator(&translator);
-	
+
+	QTranslator compilerTranslator;
+	app.installTranslator(&compilerTranslator);
+
 	if (showDoc)
 	{
 		// directly show doc browser
@@ -118,6 +120,7 @@ int main(int argc, char *argv[])
 			QVector<QTranslator*> translators;
 			translators.push_back(&qtTranslator);
 			translators.push_back(&translator);
+			translators.push_back(&compilerTranslator);
 			Aseba::MainWindow window(translators, commandLineTarget, autoRefresh);
 			window.show();
 			return app.exec();
