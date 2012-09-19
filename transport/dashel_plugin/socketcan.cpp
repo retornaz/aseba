@@ -41,6 +41,10 @@
 #define PF_CAN AF_CAN
 #endif
 
+#ifndef SO_RXQ_OVFL
+#define SO_RXQ_OVFL             40
+#endif
+
 using namespace Dashel;
 using namespace std;
 
@@ -49,10 +53,10 @@ class CanStream: public SelectableStream
 #define TYPE_SMALL_PACKET 0x3
 #define TYPE_PACKET_NORMAL 0x0
 #define TYPE_PACKET_START 0x1
-#define TYPE_PACKET_STOP 0x0
+#define TYPE_PACKET_STOP 0x2
 
 #define CANID_TO_TYPE(canid) ((canid) >> 8)
-#define CANID_TO_ID(canid) ((canid) & 0xFF)
+#define CANID_TO_ID(canid) ((int) ((canid) & 0xFF))
 #define TO_CANID(type,id) (((type) << 8) | (id))
 
 	protected:
@@ -61,7 +65,6 @@ class CanStream: public SelectableStream
 		unsigned char rx_buffer[518];
 		unsigned int rx_len;
 		unsigned int rx_p;
-		int dropmonitor;
 		struct iovec iov;
 		struct msghdr msg;
 		struct sockaddr_can addr;
@@ -106,13 +109,12 @@ class CanStream: public SelectableStream
 			if(ioctl(fd, SIOCGIFINDEX, &ifr) < 0)
 				throw DashelException(DashelException::ConnectionFailed, 0, "Unable to get interface");
 			
-			int recvbuf_size = sizeof(struct can_frame) * 2000;
-			
+			int recvbuf_size = 2*1024*1024;
+
 			setsockopt(fd, SOL_SOCKET, SO_RCVBUFFORCE, &recvbuf_size, sizeof(recvbuf_size));
-			dropmonitor = 1;
-			if(setsockopt(fd, SOL_SOCKET, SO_RXQ_OVFL, &dropmonitor, sizeof(dropmonitor)) < 0) {
-				dropmonitor = 0;
-			}
+			int dropmonitor = 1;
+			setsockopt(fd, SOL_SOCKET, SO_RXQ_OVFL, &dropmonitor, sizeof(dropmonitor));
+
 
 			addr.can_ifindex = ifr.ifr_ifindex;
 			
@@ -125,13 +127,14 @@ class CanStream: public SelectableStream
 			rx_p = 0;
 			memset(rx_fifo, 0, sizeof(rx_fifo));
 			iov.iov_base = &rframe;
+			msg.msg_iov = &iov;
 			msg.msg_name = &addr;
 			msg.msg_iovlen = 1;
-			msg.msg_control = &ctrlmsg;
+			msg.msg_control = ctrlmsg;
 		}
 	private:
 		int is_packet_tx(void) {
-			unsigned int packet_len;
+			int packet_len;
 			if(tx_len < 6)
 				return 0;
 			packet_len = tx_buffer[0] | (tx_buffer[1] << 8); // Little endian
@@ -262,11 +265,11 @@ class CanStream: public SelectableStream
 					if(rx_len == 4 && CANID_TO_TYPE(rx_fifo[i].f.can_id) != TYPE_PACKET_START) {
 						// We got a stop, but not a start, let's ignore this packet
 						ignore = 1;
-
 					}
-					if(rx_len + rx_fifo[i].f.can_dlc > sizeof(rx_buffer))
+					if(rx_len + rx_fifo[i].f.can_dlc > sizeof(rx_buffer)) {
+						cout << "Packet too large\n";
 						throw DashelException(DashelException::IOError, 0, "Packet too large!");
-
+					}
 					memcpy(&rx_buffer[rx_len], rx_fifo[i].f.data, rx_fifo[i].f.can_dlc);
 					rx_len += rx_fifo[i].f.can_dlc;
 					rx_fifo[i].used = 0;	
@@ -299,23 +302,26 @@ class CanStream: public SelectableStream
 			int def;
 			while(1) {
 				while((def = defragment()) == -1);
-				if(def == 0)
+				if(def == 1)
 					break;
 				struct cmsghdr *cmsg;
 				iov.iov_len = sizeof(rframe);
 				msg.msg_namelen = sizeof(addr);
 				msg.msg_controllen = sizeof(ctrlmsg);
 				msg.msg_flags = 0;
-				if(recvmsg(fd, &msg, 0) < sizeof(rframe))
+				if(recvmsg(fd, &msg, 0) < (int) sizeof(rframe))
 					throw DashelException(DashelException::IOError, 0, "Read error");
+
 				
 				for(cmsg = CMSG_FIRSTHDR(&msg); 
 					cmsg && (cmsg->cmsg_level == SOL_SOCKET);
 					cmsg = CMSG_NXTHDR(&msg,cmsg)) {
 					if(cmsg->cmsg_type == SO_RXQ_OVFL) {
 						unsigned int dropcnt = *(__u32 *)CMSG_DATA(cmsg);
-						if(dropcnt)
+						if(dropcnt) {
+							cout << "Packet dropped: " << dropcnt << "\n";
 							throw DashelException(DashelException::IOError, 0, "Packet dropped");
+						}
 					}
 				}
 			
