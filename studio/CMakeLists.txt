@@ -84,7 +84,8 @@ if (QT4_FOUND)
 		Plugin.cpp
 		HelpViewer.cpp
 		plugins/VariablesViewPlugin.cpp
-		plugins/ThymioBootloader.cpp)
+		plugins/ThymioBootloader.cpp
+		../${TRANSPORT_PLUGIN})
 	
 	qt4_automoc(${studio_SRCS})
 	

@@ -1,5 +1,6 @@
 add_executable(asebacmd
 	cmd.cpp
+	../${TRANSPORT_PLUGIN}
 )
 
 target_link_libraries(asebacmd asebacore ${EXTRA_LIBS})

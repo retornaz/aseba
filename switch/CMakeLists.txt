@@ -1,5 +1,6 @@
 add_executable(asebaswitch
 	switch.cpp
+	../${TRANSPORT_PLUGIN}
 )
 
 target_link_libraries(asebaswitch asebacore ${EXTRA_LIBS})
