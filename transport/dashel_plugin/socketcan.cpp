@@ -34,19 +34,36 @@
 #include <dashel/dashel.h>
 #include <dashel/dashel-posix.h>
 
+#include "../../common/consts.h"
+
 #ifndef AF_CAN
-#define AF_CAN 29
+#define AF_CAN		29
 #endif
 #ifndef PF_CAN
-#define PF_CAN AF_CAN
+#define PF_CAN 		AF_CAN
 #endif
 
 #ifndef SO_RXQ_OVFL
-#define SO_RXQ_OVFL             40
+#define SO_RXQ_OVFL	40
 #endif
 
 using namespace Dashel;
 using namespace std;
+
+
+/* CanStream implementation
+ * This is the protocol used in the MarxBot and Handbot robots.
+ * It needs a SocketCAN interface (Linux native CAN interfaces).
+ *
+ * This stream (named "can") accept only one parameter:
+ * 	if : The CAN interface to use
+ *
+ * The interface must already be configured & upped by your distribution script.
+ *
+ * Usage example:
+ * 	"can:if=can0"
+ *
+ */
 
 class CanStream: public SelectableStream
 {
@@ -60,11 +77,12 @@ class CanStream: public SelectableStream
 #define TO_CANID(type,id) (((type) << 8) | (id))
 
 	protected:
-		unsigned char tx_buffer[518];
+		unsigned char tx_buffer[ASEBA_MAX_PACKET_SIZE];
 		int tx_len;
-		unsigned char rx_buffer[518];
+		unsigned char rx_buffer[ASEBA_MAX_PACKET_SIZE];
 		unsigned int rx_len;
 		unsigned int rx_p;
+
 		struct iovec iov;
 		struct msghdr msg;
 		struct sockaddr_can addr;
@@ -85,17 +103,13 @@ class CanStream: public SelectableStream
 		{
 			struct ifreq ifr;
 
-			target.add("can:if=can0;baud=1000000");
+			target.add("can:if=can0");
 			target.add(targetName.c_str());
 			string ifName;
 			if(target.isSet("if"))
 			{
 				target.addParam("if", NULL, true);
 				ifName = target.get("if");
-			}
-			if(target.isSet("baud"))
-			{
-				std::cout << "Ignoring: " << target.get<int>("baud") << std::endl;
 			}
 			fd = socket(PF_CAN, SOCK_RAW, CAN_RAW);
 			if(fd < 0)
@@ -109,15 +123,15 @@ class CanStream: public SelectableStream
 			if(ioctl(fd, SIOCGIFINDEX, &ifr) < 0)
 				throw DashelException(DashelException::ConnectionFailed, 0, "Unable to get interface");
 			
-			int recvbuf_size = 2*1024*1024;
-
-			setsockopt(fd, SOL_SOCKET, SO_RCVBUFFORCE, &recvbuf_size, sizeof(recvbuf_size));
-			int dropmonitor = 1;
-			setsockopt(fd, SOL_SOCKET, SO_RXQ_OVFL, &dropmonitor, sizeof(dropmonitor));
-
+                        // Try to have 2Mb RX buffer
+			int options = 2*1024*1024;
+			setsockopt(fd, SOL_SOCKET, SO_RCVBUFFORCE, &options, sizeof(options));
+                        
+                        // Enable monitoring of dropped packets
+			options = 1;
+			setsockopt(fd, SOL_SOCKET, SO_RXQ_OVFL, &options, sizeof(options));
 
 			addr.can_ifindex = ifr.ifr_ifindex;
-			
 			if(bind(fd, (struct sockaddr *) &addr, sizeof(addr)) < 0)
 				throw DashelException(DashelException::ConnectionFailed, 0, "Unable to bind");
 
@@ -133,7 +147,8 @@ class CanStream: public SelectableStream
 			msg.msg_control = ctrlmsg;
 		}
 	private:
-		int is_packet_tx(void) {
+		int is_packet_tx(void)
+		{
 			int packet_len;
 			if(tx_len < 6)
 				return 0;
@@ -143,13 +158,15 @@ class CanStream: public SelectableStream
 			return 0;
 		}
 
-		void send_aseba_packet() {
+		void send_aseba_packet()
+		{
 			struct can_frame frame;
 			unsigned int packet_len = tx_buffer[0] | (tx_buffer[1] << 8); // Little endian;
 			unsigned int nodeId = tx_buffer[2] | (tx_buffer[3] << 8);
 			unsigned int msgId = tx_buffer[4] | (tx_buffer[5] << 8);
 			
-			if(packet_len  <= 6) {
+			if(packet_len  <= 6) 
+			{
 				// Small packet
 				frame.can_id = TO_CANID(TYPE_SMALL_PACKET, nodeId);
 				frame.can_dlc = packet_len + 2;
@@ -158,19 +175,22 @@ class CanStream: public SelectableStream
 				memcpy(&frame.data[2], &tx_buffer[6], packet_len);
 				if(::write(fd,&frame, sizeof(frame)) != sizeof(frame))
 					throw DashelException(DashelException::IOError, 0, "Write error");
-			} else {
+			} 
+			else 
+			{
 				unsigned char * p = &tx_buffer[6];
 				frame.can_id = TO_CANID(TYPE_PACKET_START, nodeId);
 				frame.can_dlc = 8;
 				frame.data[0] = msgId;
 				frame.data[1] = msgId >> 8;
 				memcpy(&frame.data[2], p, 6);
-				p+=6;
-				packet_len-=6;
+				p += 6;
+				packet_len -= 6;
 				if(::write(fd, &frame, sizeof(frame)) != sizeof(frame)) 
 					throw DashelException(DashelException::IOError, 0, "Write error");
 
-				while(packet_len > 8) {
+				while(packet_len > 8)
+				{
 					frame.can_id = TO_CANID(TYPE_PACKET_NORMAL, nodeId);
 					frame.can_dlc = 8;
 					memcpy(frame.data, p, 8);
@@ -184,53 +204,53 @@ class CanStream: public SelectableStream
 				memcpy(frame.data, p, packet_len);
 				if(::write(fd, &frame, sizeof(frame)) != sizeof(frame))
 					throw DashelException(DashelException::IOError, 0, "Write error");
-
 			}
 			tx_len = 0;
-
 		}
 	public:
-		virtual void write(const void *data, const size_t size) {
+		virtual void write(const void *data, const size_t size)
+		{
 			size_t s = size;
 			const unsigned char * d = (const unsigned char * ) data;
-			while(s--) {
+			while(s--)
+			{
 				tx_buffer[tx_len++] = *d++;
-				if(is_packet_tx()) {
+				if(is_packet_tx())
 					send_aseba_packet();
-				}
 			}
 		}
+
 		virtual void flush() 
 		{
-			// Nop 
-			// if(tx_len)
-			// 	abort()
 		}
 	private:
-		void pack_fifo() {
+		void pack_fifo()
+		{
 			while(!rx_fifo[rx_consume].used && rx_consume != rx_insert)
 			{
-				if(++rx_consume == RX_CAN_SIZE) {
+				if(++rx_consume == RX_CAN_SIZE)
 					rx_consume = 0;
-				}
 			}
 		}
 
 		// 1 if defragment was sucessfull.
 		// 0 if not,
 		// -1 if needs to recall (one packet was dropped because not full)
-		int defragment(void) {
+		int defragment(void)
+		{
 			int i;
 			int stopId;
 			int stopPos = -1;
 			int ignore = 0;
-			for(i = rx_consume; i != rx_insert; ) {
-				if(rx_fifo[i].used) {
-					if(CANID_TO_TYPE(rx_fifo[i].f.can_id) == TYPE_SMALL_PACKET) {
+			for(i = rx_consume; i != rx_insert; ) 
+			{
+				if(rx_fifo[i].used)
+				{
+					if(CANID_TO_TYPE(rx_fifo[i].f.can_id) == TYPE_SMALL_PACKET)
+					{
 						if(rx_fifo[i].f.can_dlc < 2)
-						{
 							throw DashelException(DashelException::IOError, 0, "Packet too short");
-						}
+
 						rx_buffer[0] = rx_fifo[i].f.can_dlc - 2;
 						rx_buffer[1] = 0;
 						rx_buffer[2] = CANID_TO_ID(rx_fifo[i].f.can_id);
@@ -242,7 +262,8 @@ class CanStream: public SelectableStream
 						rx_fifo[i].used = 0; // Free the frame (pack_fifo())
 						return 1;
 					}
-					if(CANID_TO_TYPE(rx_fifo[i].f.can_id) == TYPE_PACKET_STOP) {
+					if(CANID_TO_TYPE(rx_fifo[i].f.can_id) == TYPE_PACKET_STOP)
+					{
 						stopPos = i;
 						stopId = CANID_TO_ID(rx_fifo[i].f.can_id);
 						break;
@@ -260,50 +281,58 @@ class CanStream: public SelectableStream
 			rx_buffer[2] = stopId;
 			rx_buffer[3] = 0;
 			rx_len = 4;
-			while(1) {
-				if(rx_fifo[i].used && CANID_TO_ID(rx_fifo[i].f.can_id) == stopId) {
-					if(rx_len == 4 && CANID_TO_TYPE(rx_fifo[i].f.can_id) != TYPE_PACKET_START) {
+			while(1) 
+			{
+				if(rx_fifo[i].used && CANID_TO_ID(rx_fifo[i].f.can_id) == stopId)
+				{
+					if(rx_len == 4 && CANID_TO_TYPE(rx_fifo[i].f.can_id) != TYPE_PACKET_START)
 						// We got a stop, but not a start, let's ignore this packet
 						ignore = 1;
-					}
-					if(rx_len + rx_fifo[i].f.can_dlc > sizeof(rx_buffer)) {
-						cout << "Packet too large\n";
+
+					if(rx_len + rx_fifo[i].f.can_dlc > sizeof(rx_buffer))
 						throw DashelException(DashelException::IOError, 0, "Packet too large!");
-					}
+
 					memcpy(&rx_buffer[rx_len], rx_fifo[i].f.data, rx_fifo[i].f.can_dlc);
 					rx_len += rx_fifo[i].f.can_dlc;
 					rx_fifo[i].used = 0;	
-					
+
 					if(i == stopPos)
 						break;
 				}
 				if(++i == RX_CAN_SIZE)
 					i = 0;
 			}
-			if(ignore) {
+			if(ignore)
+			{
 				rx_len = 0;
 				rx_p = 0;
 				return -1;
-			} else {
+			} 
+			else
+			{
 				rx_buffer[0] = rx_len - 6;
 				rx_buffer[1] = (rx_len - 6) >> 8;
 				rx_p = 0;
 				return 1;
 			}
 		}
-		int fifo_full() {
+		int fifo_full() 
+		{
 			int i = rx_insert + 1;
 			if(i == RX_CAN_SIZE)
 				i = 0;
 			return i == rx_consume;
 		}
 
-		void read_iface(void) {
+		void read_iface(void)
+		{
 			int def;
-			while(1) {
+			while(1)
+			{
 				while((def = defragment()) == -1);
 				if(def == 1)
 					break;
+
 				struct cmsghdr *cmsg;
 				iov.iov_len = sizeof(rframe);
 				msg.msg_namelen = sizeof(addr);
@@ -312,22 +341,21 @@ class CanStream: public SelectableStream
 				if(recvmsg(fd, &msg, 0) < (int) sizeof(rframe))
 					throw DashelException(DashelException::IOError, 0, "Read error");
 
-				
 				for(cmsg = CMSG_FIRSTHDR(&msg); 
 					cmsg && (cmsg->cmsg_level == SOL_SOCKET);
-					cmsg = CMSG_NXTHDR(&msg,cmsg)) {
-					if(cmsg->cmsg_type == SO_RXQ_OVFL) {
-						unsigned int dropcnt = *(__u32 *)CMSG_DATA(cmsg);
-						if(dropcnt) {
-							cout << "Packet dropped: " << dropcnt << "\n";
+					cmsg = CMSG_NXTHDR(&msg,cmsg))
+				{
+					if(cmsg->cmsg_type == SO_RXQ_OVFL)
+					{
+						__u32 * dropcnt = (__u32 *) CMSG_DATA(cmsg);
+						if(*dropcnt)
 							throw DashelException(DashelException::IOError, 0, "Packet dropped");
-						}
 					}
 				}
 			
-				if(fifo_full()) {
+				if(fifo_full())
 					throw DashelException(DashelException::IOError, 0, "Fifo full");
-				}
+
 				// push to fifo ...
 				memcpy(&rx_fifo[rx_insert].f,&rframe,sizeof(rframe));
 				rx_fifo[rx_insert++].used = 1;
@@ -337,24 +365,31 @@ class CanStream: public SelectableStream
 			pack_fifo();
 		}
 	public:
-		virtual void read(void *data, size_t size) {
+		virtual void read(void *data, size_t size) 
+		{
 			unsigned char * d = (unsigned char *) data;
-			while(size) {
-				if(rx_len) {
+			while(size)
+			{
+				if(rx_len)
+				{
 					*d++ = rx_buffer[rx_p++];
 					rx_len--;
 					size--;
-				} else {
+				} 
+				else 
+				{
 					read_iface();
 				}
 			}
 		}
 
-		virtual bool receiveDataAndCheckDisconnection() {
+		virtual bool receiveDataAndCheckDisconnection()
+		{
 			return false;
 		}
 
-		virtual bool isDataInRecvBuffer() const {
+		virtual bool isDataInRecvBuffer() const 
+		{
 			struct can_frame f;
 			if(rx_len || rx_insert != rx_consume)
 				return true;
@@ -363,7 +398,7 @@ class CanStream: public SelectableStream
 				return true;
 
 			return false;
-		}	
+		}
 
 
 };
