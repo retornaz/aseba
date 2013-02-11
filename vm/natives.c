@@ -733,11 +733,11 @@ void AsebaNative_vecargbounds(AsebaVMState *vm)
 const AsebaNativeFunctionDescription AsebaNativeDescription_vecargbounds =
 {
 	"math.argbounds",
-	"get the indices (argmin, argmax) of the (minimum, maximum) values of src",
+	"get the indices (amin, amax) of the min & max values of src",
 	{
 		{ -1, "src" },
-		{ 1, "argmin" },
-		{ 1, "argmax" },
+		{ 1, "amin" },
+		{ 1, "amax" },
 		{ 0, 0 }
 	}
 };
@@ -1057,7 +1057,7 @@ doubleBreak:
 const AsebaNativeFunctionDescription AsebaNativeDescription_vecnonzerosequence =
 {
 	"math.nzseq",
-	"write to dest the middle index of the largest sequence of non-zero elements from src, -1 if not found or if smaller than minLength",
+	"bla",
 	{
 		{ 1, "dest" },
 		{ -1, "src" },
